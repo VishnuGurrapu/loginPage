@@ -1,4 +1,3 @@
-// Write your JS code here
 import {Component} from 'react'
 
 import './index.css'
@@ -7,39 +6,22 @@ class LoginForm extends Component {
   state = {
     username: '',
     password: '',
-    isloginSuccessful: true,
-    errorMessage:''
+    showSubmitError: false,
+    errorMsg: '',
   }
 
-  onChangeUsername = event => {
-    this.setState({username: event.target.value})
-  }
-
-  onChangePassword = event => {
-    this.setState({password: event.target.value})
-  }
   onSubmitSuccess = () => {
     const {history} = this.props
     history.replace('/')
   }
-  onSubmitFailure = (message) => {
-  this.setState({ isloginSuccessful: false, errorMessage: message }); 
-}
 
-loginWentWrong = () => {
-  const { errorMessage } = this.state;
-  return errorMessage ? <p className="error-message">{errorMessage}</p> : null; 
-}
+  onSubmitFailure = errorMsg => {
+    this.setState({showSubmitError: true, errorMsg})
+  }
+
   submitForm = async event => {
     event.preventDefault()
     const {username, password} = this.state
-    if (username === '') {
-    this.onSubmitFailure('*Username is required');
-    return;
-  } else if (password === '') {
-    this.onSubmitFailure('*Password is required');
-    return;
-  }
     const userDetails = {username, password}
     const url = 'https://apis.ccbp.in/login'
     const options = {
@@ -52,8 +34,16 @@ loginWentWrong = () => {
     if (response.ok === true) {
       this.onSubmitSuccess()
     } else {
-      this.onSubmitFailure('*Username not found');
+      this.onSubmitFailure(data.error_msg)
     }
+  }
+
+  onChangeUsername = event => {
+    this.setState({username: event.target.value})
+  }
+
+  onChangePassword = event => {
+    this.setState({password: event.target.value})
   }
 
   renderPasswordField = () => {
@@ -87,14 +77,15 @@ loginWentWrong = () => {
           id="username"
           className="username-input-filed"
           value={username}
-          onChange={this.onChangeUsername}
           placeholder="Username"
+          onChange={this.onChangeUsername}
         />
       </>
     )
   }
 
   render() {
+    const {showSubmitError, errorMsg} = this.state
     return (
       <div className="login-form-container">
         <img
@@ -118,7 +109,7 @@ loginWentWrong = () => {
           <button type="submit" className="login-button">
             Login
           </button>
-          {this.loginWentWrong()}
+          {showSubmitError && <p className="error-message">*{errorMsg}</p>}
         </form>
       </div>
     )
